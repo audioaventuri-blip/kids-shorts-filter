@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Safe Shorts Feed</title>
+    <title>Safe Shorts</title>
     <style>
         body, html {
             margin: 0;
@@ -11,144 +11,95 @@
             width: 100%;
             height: 100%;
             background-color: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .shorts-container {
+        .shorts-wrapper {
             position: relative;
             width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            background: #111;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            max-width: 450px;
+            height: 100%;
+            background: #000;
         }
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            pointer-events: auto;
-        }
-        .overlay-ui {
             position: absolute;
-            bottom: 30px;
+            top: 0;
+            left: 0;
+        }
+        .next-bar {
+            position: absolute;
+            bottom: 40px;
             right: 20px;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            z-index: 999;
         }
         .btn-next {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+            background: rgba(255, 255, 255, 0.25);
             color: white;
-            padding: 12px 20px;
+            border: none;
+            padding: 14px 24px;
             border-radius: 30px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-        .title-box {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-            pointer-events: none;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
-    <div class="shorts-container">
-        <div class="title-box" id="v-title">Se încarcă titlul...</div>
-        
-        <!-- Playerul care va rula clipurile succesiv -->
-        <div id="player-box" style="width:100%; height:100%;"></div>
+    <div class="shorts-wrapper" id="player-container">
+        <!-- Aici se va încărca scurtătura de Short -->
+    </div>
 
-        <div class="overlay-ui">
-            <button class="btn-next" onclick="nextVideo()">Următorul ➡️</button>
-        </div>
+    <div class="next-bar">
+        <button class="btn-next" onclick="nextShort()">Următorul ➡️</button>
     </div>
 
     <script>
         let playlist = [];
         let currentIndex = 0;
-        let player;
 
-        // Încărcăm scriptul oficial YouTube Iframe API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        async function initFeed() {
+        async function loadPlaylist() {
             try {
                 let response = await fetch('playlist.json');
                 playlist = await response.json();
                 if (playlist.length > 0) {
                     currentIndex = 0;
-                    loadCurrentVideo();
+                    renderShort();
                 }
             } catch (e) {
-                document.getElementById('v-title').innerText = "Eroare la încărcarea listei.";
+                console.log("Eroare la încărcare");
             }
         }
 
-        function onYouTubeIframeAPIReady() {
-            // Inițializăm playerul cu primul video din listă sau un fallback
-            player = new YT.Player('player-box', {
-                height: '100%',
-                width: '100%',
-                videoId: 'dQw4w9WgXcQ', 
-                playerVars: {
-                    'playsinline': 1,
-                    'autoplay': 1,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'modestbranding': 1,
-                    'iv_load_policy': 3
-                },
-                events: {
-                    'onReady': (event) => {
-                        initFeed();
-                    },
-                    'onStateChange': (event) => {
-                        // Când se termină un video (starea 0), poate trece automat la următorul
-                        if (event.data === YT.PlayerState.ENDED) {
-                            nextVideo();
-                        }
-                    }
-                }
-            });
+        function renderShort() {
+            if (playlist.length === 0) return;
+            let current = playlist[currentIndex];
+            
+            let container = document.getElementById('player-container');
+            // Folosim link-ul nativ de embed vertical specific pentru YouTube Shorts
+            container.innerHTML = `
+                <iframe src="https://www.youtube.com/embed/${current.id}?autoplay=1&controls=0&modestbranding=1&loop=1&playlist=${current.id}" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
         }
 
-        function loadCurrentVideo() {
+        function nextShort() {
             if (playlist.length === 0) return;
-            let v = playlist[currentIndex];
-            document.getElementById('v-title').innerText = v.title;
-            if (player && player.loadVideoById) {
-                player.loadVideoById(v.id);
-            }
+            currentIndex = (currentIndex + 1) % playlist.length;
+            renderShort();
         }
 
-        function nextVideo() {
-            if (playlist.length === 0) return;
-            currentIndex = (currentIndex + 1) % playlist.length; // Trecem la următorul și ciclăm
-            loadCurrentVideo();
-        }
+        // Încarcă la pornire
+        loadPlaylist();
     </script>
 </body>
 </html>
