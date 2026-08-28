@@ -11,52 +11,102 @@
             width: 100%;
             height: 100%;
             background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            box-sizing: border-box;
+            background: #111;
+        }
+        .card-view {
+            width: 90%;
+            height: 75vh;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .shorts-wrapper {
-            position: relative;
+        .card-view img {
             width: 100%;
-            max-width: 480px;
             height: 100%;
-            background: #000;
+            object-fit: cover;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .title-box {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            padding: 25px 15px 15px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
         }
-        .next-bar {
+        .btn-play {
             position: absolute;
-            bottom: 35px;
-            right: 20px;
-            z-index: 999;
-        }
-        .btn-next {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 0, 0, 0.85);
             color: white;
             border: none;
-            padding: 14px 26px;
-            border-radius: 35px;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .btn-play:active {
+            transform: scale(0.95);
+        }
+        .nav-bar {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .btn-nav {
+            flex: 1;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
     </style>
 </head>
 <body>
 
-    <div class="shorts-wrapper" id="player-container"></div>
+    <div class="container">
+        <div id="video-title" style="font-size: 14px; color: #888;">Explore Nature Feed</div>
+        
+        <div class="card-view" id="card-container">
+            <!-- Aici se încarcă imaginea și butonul de pornire curată -->
+        </div>
 
-    <div class="next-bar">
-        <button class="btn-next" onclick="nextShort()">Următorul ➡️</button>
+        <div class="nav-bar">
+            <button class="btn-nav" onclick="prevShort()">⬅️ Anterior</button>
+            <button class="btn-nav" onclick="nextShort()" style="background: #1e88e5;">Următorul ➡️</button>
+        </div>
     </div>
 
     <script>
@@ -69,30 +119,41 @@
                 playlist = await response.json();
                 if (playlist.length > 0) {
                     currentIndex = 0;
-                    renderShort();
+                    renderCard();
                 }
             } catch (e) {
-                console.log("Eroare la încărcare");
+                document.getElementById('card-container').innerHTML = "<p>Eroare la încărcare</p>";
             }
         }
 
-        function renderShort() {
+        function renderCard() {
             if (playlist.length === 0) return;
             let current = playlist[currentIndex];
             
-            let container = document.getElementById('player-container');
+            let container = document.getElementById('card-container');
+            // Folosim poza oficială de înaltă calitate a videoclipului și un buton de redare securizat
             container.innerHTML = `
-                <iframe src="https://www.youtube.com/embed/${current.id}?autoplay=1&controls=0&modestbranding=1&loop=1&playlist=${current.id}" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
+                <img src="https://img.youtube.com/vi/${current.id}/hqdefault.jpg" alt="Nature Short">
+                <div class="title-box">${current.title}</div>
+                <button class="btn-play" onclick="openShort('${current.id}')">▶ Redă Short-ul</button>
             `;
+        }
+
+        function openShort(id) {
+            // Deschide clipul curat direct în aplicația YouTube sau player nativ fără mizerii în jur
+            window.location.href = `https://www.youtube.com/shorts/${id}`;
         }
 
         function nextShort() {
             if (playlist.length === 0) return;
             currentIndex = (currentIndex + 1) % playlist.length;
-            renderShort();
+            renderCard();
+        }
+
+        function prevShort() {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            renderCard();
         }
 
         loadPlaylist();
