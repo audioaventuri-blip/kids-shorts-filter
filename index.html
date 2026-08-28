@@ -3,85 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Explore Nature Shorts</title>
+    <title>Explore Nature Safe Feed</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #0f0f0f;
+            background-color: #050505;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: sans-serif;
         }
-        .app-container {
+        .phone-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 420px;
             height: 100vh;
+            background: #111;
             display: flex;
             flex-direction: column;
-            background: #000;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 20px 15px;
         }
-        .header {
-            padding: 15px;
+        .header-title {
             text-align: center;
-            color: #fff;
-            font-size: 16px;
-            background: #111;
-            font-weight: bold;
+            font-size: 15px;
+            color: #888;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
-        .player-wrapper {
-            flex-grow: 1;
+        .video-card {
             width: 100%;
+            height: 72vh;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
             position: relative;
-            background: #222;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
         }
-        iframe {
+        .video-card img {
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover;
             position: absolute;
             top: 0;
             left: 0;
         }
-        .controls {
+        .card-overlay {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(transparent, rgba(0,0,0,0.95));
+            padding: 30px 20px 25px 20px;
             display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background: #111;
-            gap: 10px;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
-        .btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
+        .video-title-text {
+            font-size: 18px;
             font-weight: bold;
+            text-align: center;
+            line-height: 1.3;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .btn-launch {
+            background: #2e7d32;
             color: white;
-            background: #333;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+        .btn-nav {
+            flex: 1;
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
         }
-        .btn-next {
-            background: #2e7d32; /* Verde curat de natură */
+        .btn-nav:active {
+            background: #333;
         }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="header" id="video-title">Se încarcă Natura...</div>
+    <div class="phone-container">
+        <div class="header-title">🌿 EXPLORE NATURE (SAFE FEED)</div>
         
-        <div class="player-wrapper" id="player-box">
-            <!-- Iframe-ul va fi generat aici -->
+        <div class="video-card" id="card-box">
+            <!-- Conținutul dinamic va fi încărcat aici -->
         </div>
 
-        <div class="controls">
-            <button class="btn" onclick="prevVideo()">Înapoi</button>
-            <button class="btn btn-next" onclick="nextVideo()">Următorul ➡️</button>
+        <div class="nav-buttons">
+            <button class="btn-nav" onclick="prevItem()">⬅️ Anterior</button>
+            <button class="btn-nav" onclick="nextItem()" style="background: #1b5e20;">Următorul ➡️</button>
         </div>
     </div>
 
@@ -89,52 +125,52 @@
         let playlist = [];
         let currentIndex = 0;
 
-        async function initApp() {
+        async function loadData() {
             try {
                 let response = await fetch('playlist.json');
                 playlist = await response.json();
                 if (playlist.length > 0) {
                     currentIndex = 0;
-                    loadVideo();
-                } else {
-                    document.getElementById('video-title').innerText = "Lista este goală.";
+                    renderCard();
                 }
             } catch (e) {
-                document.getElementById('video-title').innerText = "Eroare la conectare.";
+                document.getElementById('card-box').innerHTML = "<div style='padding:20px;text-align:center;'>Eroare la încărcarea listei.</div>";
             }
         }
 
-        function loadVideo() {
+        function renderCard() {
             if (playlist.length === 0) return;
             let current = playlist[currentIndex];
             
-            document.getElementById('video-title').innerText = current.title;
-            
-            let container = document.getElementById('player-box');
-            // Folosim youtube-nocookie pentru a crește șansele de bypass la restricțiile de embed 
-            // și ascundem pe cât posibil interfața YouTube
-            container.innerHTML = `
-                <iframe 
-                    src="https://www.youtube-nocookie.com/embed/${current.id}?autoplay=1&controls=1&modestbranding=1&rel=0&playsinline=1" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
+            let box = document.getElementById('card-box');
+            // Afișăm imaginea de fundal curată, titlul și un buton tactil mare optimizat
+            box.innerHTML = `
+                <img src="https://img.youtube.com/vi/${current.id}/hqdefault.jpg" alt="Nature Preview">
+                <div class="card-overlay">
+                    <div class="video-title-text">${current.title}</div>
+                    <button class="btn-launch" onclick="playClean('${current.id}')">▶ Deschide Clipul Curat</button>
+                </div>
             `;
         }
 
-        function nextVideo() {
+        function playClean(id) {
+            // Folosim un player alternativ orientat pe confidențialitate care evită restricțiile de pe GitHub Pages
+            window.location.href = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`;
+        }
+
+        function nextItem() {
             if (playlist.length === 0) return;
             currentIndex = (currentIndex + 1) % playlist.length;
-            loadVideo();
+            renderCard();
         }
 
-        function prevVideo() {
+        function prevItem() {
             if (playlist.length === 0) return;
             currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-            loadVideo();
+            renderCard();
         }
 
-        initApp();
+        loadData();
     </script>
 </body>
 </html>
