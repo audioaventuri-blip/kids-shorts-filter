@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Safe Shorts</title>
+    <title>Explore Nature Shorts</title>
     <style>
         body, html {
             margin: 0;
@@ -19,7 +19,7 @@
         .shorts-wrapper {
             position: relative;
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             height: 100%;
             background: #000;
         }
@@ -33,29 +33,27 @@
         }
         .next-bar {
             position: absolute;
-            bottom: 40px;
+            bottom: 35px;
             right: 20px;
             z-index: 999;
         }
         .btn-next {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
-            padding: 14px 24px;
-            border-radius: 30px;
+            padding: 14px 26px;
+            border-radius: 35px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
     </style>
 </head>
 <body>
 
-    <div class="shorts-wrapper" id="player-container">
-        <!-- Aici se va încărca scurtătura de Short -->
-    </div>
+    <div class="shorts-wrapper" id="player-container"></div>
 
     <div class="next-bar">
         <button class="btn-next" onclick="nextShort()">Următorul ➡️</button>
@@ -83,7 +81,6 @@
             let current = playlist[currentIndex];
             
             let container = document.getElementById('player-container');
-            // Folosim link-ul nativ de embed vertical specific pentru YouTube Shorts
             container.innerHTML = `
                 <iframe src="https://www.youtube.com/embed/${current.id}?autoplay=1&controls=0&modestbranding=1&loop=1&playlist=${current.id}" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -98,7 +95,6 @@
             renderShort();
         }
 
-        // Încarcă la pornire
         loadPlaylist();
     </script>
 </body>
