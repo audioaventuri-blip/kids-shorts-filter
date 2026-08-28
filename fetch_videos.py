@@ -3,11 +3,12 @@ import urllib.request
 import urllib.parse
 import re
 
-# Termenii tăi de căutare fixați pe "explore nature" pentru Shorts
+# Termeni foarte specifici pentru a prinde doar natură pură și wildlife
 WHITELIST_TERMS = [
-    "explore nature shorts",
-    "wildlife nature shorts",
-    "nature documentary short"
+    "wild animals nature shorts",
+    "beautiful nature places shorts",
+    "national geographic nature short",
+    "planet earth wildlife short"
 ]
 
 def search_youtube_shorts(query):
@@ -19,7 +20,7 @@ def search_youtube_shorts(query):
     try:
         html_content = urllib.request.urlopen(req).read().decode('utf-8')
         video_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html_content)
-        return list(dict.fromkeys(video_ids))[:8]
+        return list(dict.fromkeys(video_ids))[:10]
     except Exception as e:
         print(f"Eroare căutare: {e}")
         return []
@@ -37,7 +38,6 @@ def generate_clean_playlist():
                 "category": "nature"
             })
             
-    # Fallback de siguranță dacă nu returnează rețeaua
     if not all_videos:
         all_videos = [
             {"id": "Lu34rt8h3EA", "title": "Nature Exploration", "category": "nature"}
